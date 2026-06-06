@@ -1,0 +1,6 @@
+{
+  "name": "Electro Book",
+  "description": "An advanced electricity metering dashboard, analytics, and smart prediction platform that tracks live stats, configures alerts, and offers AI energy conservation advisory.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

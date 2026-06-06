@@ -1,0 +1,60 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        "profile": {
+          ".read": "auth != null && (auth.uid === $uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+          ".write": "auth != null && (auth.uid === $uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')"
+        }
+      }
+    },
+    "meters": {
+      "$meterId": {
+        "info": {
+          ".read": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+          ".write": "auth != null && root.child('users/' + auth.uid + '/profile/role').val() === 'admin'"
+        },
+        "live": {
+          ".read": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+          ".write": true
+        },
+        "readings": {
+          ".read": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+          ".write": true
+        },
+        "thresholds": {
+          ".read": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+          ".write": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')"
+        }
+      }
+    },
+    "alarms": {
+      "$meterId": {
+        ".read": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+        ".write": "auth != null"
+      }
+    },
+    "bills": {
+      "$meterId": {
+        ".read": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+        ".write": "auth != null && root.child('users/' + auth.uid + '/profile/role').val() === 'admin'"
+      }
+    },
+    "payments": {
+      "$paymentId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "predictions": {
+      "$meterId": {
+        ".read": "auth != null && (root.child('meters/' + $meterId + '/info/assignedTo').val() === auth.uid || root.child('users/' + auth.uid + '/profile/role').val() === 'admin')",
+        ".write": "auth != null"
+      }
+    },
+    "admin": {
+      ".read": "auth != null && root.child('users/' + auth.uid + '/profile/role').val() === 'admin'",
+      ".write": "auth != null && root.child('users/' + auth.uid + '/profile/role').val() === 'admin'"
+    }
+  }
+}

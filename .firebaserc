@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "electro-book-smart-meter"
+  },
+  "targets": {
+    "electro-book-smart-meter": {
+      "hosting": {
+        "mobile": ["electro-book-mobile"],
+        "web-dashboard": ["electro-book-dashboard"]
+      }
+    }
+  }
+}
