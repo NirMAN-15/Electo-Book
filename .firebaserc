@@ -5,9 +5,24 @@
   "targets": {
     "electro-book-smart-meter": {
       "hosting": {
-        "mobile": ["electro-book-mobile"],
-        "web-dashboard": ["electro-book-dashboard"]
+        "mobile": [
+          "electro-book-mobile"
+        ],
+        "web-dashboard": [
+          "electro-book-dashboard"
+        ]
+      }
+    },
+    "electro-book-v01": {
+      "hosting": {
+        "mobile": [
+          "mobile-app-a8b2c"
+        ],
+        "web-dashboard": [
+          "web-dashboard-a8b2c"
+        ]
       }
     }
-  }
+  },
+  "etags": {}
 }

@@ -1,6 +1,8 @@
 import React from 'react';
 import { FileText, Download, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const mockBills = [
   { id: 'INV-2026-10', month: 'October 2026', amount: 15400, units: 350, status: 'unpaid', dueDate: '2026-11-15' },
@@ -11,6 +13,29 @@ const mockBills = [
 export const BillHistory: React.FC = () => {
   const navigate = useNavigate();
   const unpaidBill = mockBills.find(b => b.status === 'unpaid');
+
+  const downloadPDF = (bill: any) => {
+    const doc = new jsPDF();
+    doc.setFontSize(22);
+    doc.text("Electro Book - Invoice", 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Invoice ID: ${bill.id}`, 20, 30);
+    doc.text(`Billing Month: ${bill.month}`, 20, 40);
+    doc.text(`Due Date: ${new Date(bill.dueDate).toLocaleDateString()}`, 20, 50);
+    doc.text(`Status: ${bill.status.toUpperCase()}`, 20, 60);
+    
+    autoTable(doc, {
+      startY: 70,
+      head: [['Description', 'Units', 'Amount']],
+      body: [
+        ['Electricity Consumption', `${bill.units} kWh`, `Rs. ${bill.amount.toLocaleString()}`],
+        ['Total', '', `Rs. ${bill.amount.toLocaleString()}`]
+      ],
+    });
+    
+    doc.save(`${bill.id}.pdf`);
+  };
 
   return (
     <div>
@@ -54,7 +79,7 @@ export const BillHistory: React.FC = () => {
                   {bill.status}
                 </span>
               </div>
-              <button className="btn btn-ghost" title="Download PDF" onClick={() => alert('PDF generation started... Download will begin shortly.')}>
+              <button className="btn btn-ghost" title="Download PDF" onClick={() => downloadPDF(bill)}>
                 <Download size={20} />
               </button>
             </div>

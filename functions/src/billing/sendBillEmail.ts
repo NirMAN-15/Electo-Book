@@ -1,35 +1,48 @@
-import * as functions from "firebase-functions";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import * as nodemailer from "nodemailer";
+import { logger } from "firebase-functions/v2";
+import type { CallableRequest } from "firebase-functions/v2/https";
 
-export const sendBillEmail = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError("unauthenticated", "User must be logged in.");
-  }
+interface SendBillEmailRequest {
+  meterId: string;
+  billId: string;
+}
 
-  const { meterId, billId } = data;
-  if (!meterId || !billId) {
-    throw new functions.https.HttpsError("invalid-argument", "Missing meterId or billId");
-  }
+export const sendBillEmail = onCall(
+  { region: "asia-south1" },
+  async (request: CallableRequest<SendBillEmailRequest>) => {
+    const context = request.auth;
+    const data = request.data;
 
-  const db = admin.database();
-  
-  try {
-    const billSnap = await db.ref(`/bills/${meterId}/${billId}`).once('value');
-    const bill = billSnap.val();
-    if (!bill) {
-      throw new functions.https.HttpsError("not-found", "Bill not found");
+    if (!context) {
+      throw new HttpsError("unauthenticated", "User must be authenticated");
     }
 
-    const userProfileSnap = await db.ref(`/users/${context.auth.uid}/profile`).once('value');
-    const userProfile = userProfileSnap.val();
-    if (!userProfile || !userProfile.email) {
-      throw new functions.https.HttpsError("failed-precondition", "User email not found");
+    const { meterId, billId } = data;
+
+    if (!meterId || !billId) {
+      throw new HttpsError("invalid-argument", "Missing meterId or billId");
     }
 
-    // Configure transport using env vars (fallback to mock for compilation)
-    const emailUser = functions.config().email?.user || process.env.EMAIL_USER || "test@example.com";
-    const emailPass = functions.config().email?.pass || process.env.EMAIL_PASS || "password";
+    const db = admin.database();
+    
+    try {
+      const billSnap = await db.ref(`/bills/${meterId}/${billId}`).once('value');
+      const bill = billSnap.val();
+      if (!bill) {
+        throw new HttpsError("not-found", "Bill not found");
+      }
+
+      const userProfileSnap = await db.ref(`/users/${context.uid}/profile`).once('value');
+      const userProfile = userProfileSnap.val();
+      if (!userProfile || !userProfile.email) {
+        throw new HttpsError("failed-precondition", "User email not found");
+      }
+
+      // Configure transport using env vars (fallback to mock for compilation)
+      const emailUser = process.env.EMAIL_USER || "test@example.com";
+      const emailPass = process.env.EMAIL_PASS || "password";
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -59,7 +72,7 @@ export const sendBillEmail = functions.https.onCall(async (data, context) => {
     return { success: true, message: "Email sent successfully" };
 
   } catch (error: any) {
-    functions.logger.error("Error sending email:", error);
-    throw new functions.https.HttpsError("internal", error.message || "Failed to send email");
+    logger.error("Error sending email:", error);
+    throw new HttpsError("internal", error.message || "Failed to send email");
   }
 });

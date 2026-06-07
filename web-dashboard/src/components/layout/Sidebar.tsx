@@ -8,7 +8,6 @@ import {
   BellRing, 
   LineChart, 
   CreditCard, 
-  Lightbulb, 
   LogOut,
   ChevronLeft,
   ChevronRight,

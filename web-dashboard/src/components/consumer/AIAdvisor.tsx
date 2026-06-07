@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lightbulb, ThermometerSun, Leaf, ArrowRight } from 'lucide-react';
+import { Lightbulb, ThermometerSun, Leaf, ArrowRight, Zap } from 'lucide-react';
 
 export const AIAdvisor: React.FC = () => {
   return (

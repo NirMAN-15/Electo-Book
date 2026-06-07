@@ -1,9 +1,11 @@
-import * as functions from "firebase-functions";
+import { onValueCreated } from "firebase-functions/v2/database";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions/v2";
 
 // Update stats when new meter is added
-export const updateSystemStats = functions.database.ref("/meters/{meterId}")
-  .onCreate(async (snapshot, context) => {
+export const updateSystemStats = onValueCreated(
+  { ref: "/meters/{meterId}", region: "asia-south1" },
+  async (event) => {
     const db = admin.database();
     try {
       const statsRef = db.ref('/admin/systemStats/totalMeters');
@@ -12,6 +14,7 @@ export const updateSystemStats = functions.database.ref("/meters/{meterId}")
       });
       await db.ref('/admin/systemStats/lastUpdated').set(admin.database.ServerValue.TIMESTAMP);
     } catch (error) {
-      functions.logger.error("Error updating system stats", error);
+      logger.error("Error updating system stats", error);
     }
-  });
+  }
+);

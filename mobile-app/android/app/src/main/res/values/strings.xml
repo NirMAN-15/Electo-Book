@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Electro Book</string>
+    <string name="title_activity_main">Electro Book</string>
+    <string name="package_name">com.kaveesh.electrobook</string>
+    <string name="custom_url_scheme">com.kaveesh.electrobook</string>
+</resources>

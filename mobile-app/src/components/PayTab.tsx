@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import { MeterState, MeterSettings } from '../types';
 import { useTranslation } from '../utils/translations';
-
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 interface PayTabProps {
   state: MeterState;
   settings: MeterSettings;
@@ -166,6 +167,28 @@ export default function PayTab({ state, settings, onPaymentSuccess }: PayTabProp
     setPaymentPhase('idle');
   };
 
+  const downloadReceiptPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(22);
+    doc.text("Electro Book - Receipt", 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Receipt ID: ${tempReceiptId}`, 20, 30);
+    doc.text(`Paid For: ${currentMonthName} ${currentYear}`, 20, 40);
+    doc.text(`Status: VERIFIED`, 20, 50);
+    
+    autoTable(doc, {
+      startY: 60,
+      head: [['Description', 'Amount']],
+      body: [
+        ['Electricity Bill Payment', `Rs. ${billingAmount.toLocaleString()}`],
+        ['Total Paid', `Rs. ${billingAmount.toLocaleString()}`]
+      ],
+    });
+    
+    doc.save(`Receipt_${tempReceiptId}.pdf`);
+  };
+
   // Current calendar dates for payment metadata
   const currentMonthName = new Date().toLocaleString('en-US', { month: 'long' });
   const currentYear = new Date().getFullYear();
@@ -216,7 +239,7 @@ export default function PayTab({ state, settings, onPaymentSuccess }: PayTabProp
 
           <div className="flex gap-2">
             <button 
-              onClick={() => alert('PDF Receipt Downloading...')}
+              onClick={downloadReceiptPDF}
               className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl text-xs font-black tracking-wide uppercase transition hover:scale-[1.01] active:scale-[0.99] focus:outline-none"
             >
               Download PDF

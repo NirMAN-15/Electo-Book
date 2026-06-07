@@ -1,0 +1,1 @@
+{"version":3,"file":"sendBillEmail.d.ts","sourceRoot":"","sources":["../../src/billing/sendBillEmail.ts"],"names":[],"mappings":"AAMA,UAAU,oBAAoB;IAC5B,OAAO,EAAE,MAAM,CAAC;IAChB,MAAM,EAAE,MAAM,CAAC;CAChB;AAED,eAAO,MAAM,aAAa;;;YAkExB,CAAC"}

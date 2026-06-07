@@ -1,12 +1,14 @@
-import * as functions from "firebase-functions";
+import { onValueWritten } from "firebase-functions/v2/database";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions/v2";
 
-export const processAlarmTrigger = functions.database.ref("/meters/{meterId}/live")
-  .onWrite(async (change, context) => {
-    const afterData = change.after.val();
+export const processAlarmTrigger = onValueWritten(
+  { ref: "/meters/{meterId}/live", region: "asia-south1" },
+  async (event) => {
+    const afterData = event.data.after.val();
     if (!afterData) return null;
 
-    const meterId = context.params.meterId;
+    const meterId = event.params.meterId;
     const db = admin.database();
 
     try {
@@ -49,7 +51,8 @@ export const processAlarmTrigger = functions.database.ref("/meters/{meterId}/liv
 
       return null;
     } catch (error) {
-      functions.logger.error("Error processing alarms", error);
+      logger.error("Error processing alarms", error);
       return null;
     }
-  });
+  }
+);

@@ -1,14 +1,19 @@
-import * as functions from "firebase-functions";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions/v2";
 
-export const aggregateHourlyReadings = functions.pubsub.schedule("0 * * * *")
-  .timeZone("Asia/Colombo")
-  .onRun(async (context) => {
+export const aggregateHourlyReadings = onSchedule(
+  {
+    schedule: "0 * * * *",
+    timeZone: "Asia/Colombo",
+    region: "asia-south1",
+  },
+  async () => {
     const db = admin.database();
     try {
       const metersSnap = await db.ref('/meters').once('value');
       const meters = metersSnap.val();
-      if (!meters) return null;
+      if (!meters) return;
 
       const now = Date.now();
       const cutoffTime = now - (72 * 60 * 60 * 1000); // Keep last 72 hours
@@ -41,22 +46,27 @@ export const aggregateHourlyReadings = functions.pubsub.schedule("0 * * * *")
       });
 
       await Promise.all(promises);
-      functions.logger.info("Hourly aggregation complete");
-      return null;
+      logger.info("Hourly aggregation complete");
+      return;
     } catch (error) {
-      functions.logger.error("Error aggregating hourly readings", error);
-      return null;
+      logger.error("Error aggregating hourly readings", error);
+      return;
     }
-  });
+  }
+);
 
-export const aggregateDailyReadings = functions.pubsub.schedule("0 0 * * *")
-  .timeZone("Asia/Colombo")
-  .onRun(async (context) => {
+export const aggregateDailyReadings = onSchedule(
+  {
+    schedule: "0 0 * * *",
+    timeZone: "Asia/Colombo",
+    region: "asia-south1",
+  },
+  async () => {
     const db = admin.database();
     try {
       const metersSnap = await db.ref('/meters').once('value');
       const meters = metersSnap.val();
-      if (!meters) return null;
+      if (!meters) return;
 
       const promises = Object.keys(meters).map(async (meterId) => {
         const live = meters[meterId]?.live;
@@ -100,10 +110,11 @@ export const aggregateDailyReadings = functions.pubsub.schedule("0 0 * * *")
       });
 
       await Promise.all(promises);
-      functions.logger.info("Daily aggregation and reset complete");
-      return null;
+      logger.info("Daily aggregation and reset complete");
+      return;
     } catch (error) {
-      functions.logger.error("Error aggregating daily readings", error);
-      return null;
+      logger.error("Error aggregating daily readings", error);
+      return;
     }
-  });
+  }
+);

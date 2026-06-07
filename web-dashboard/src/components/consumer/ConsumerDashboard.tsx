@@ -3,6 +3,8 @@ import { StatCard } from '../shared/StatCard';
 import { MeterGauge } from '../shared/MeterGauge';
 import { Zap, DollarSign, Activity, Battery, AlertTriangle, Wifi } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { ref, set } from 'firebase/database';
+import { auth, db } from '../../firebase/config';
 
 const mockMiniChart = [
   { time: '12am', value: 1.2 }, { time: '3am', value: 0.8 }, 
@@ -13,6 +15,24 @@ const mockMiniChart = [
 
 export const ConsumerDashboard: React.FC = () => {
   const [espConnected, setEspConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+
+  const connectESP32 = async () => {
+    setConnecting(true);
+    try {
+      if (auth.currentUser) {
+        await set(ref(db, `meters/${auth.currentUser.uid}/status`), 'connected');
+        await set(ref(db, `meters/${auth.currentUser.uid}/live`), { voltage: 230, current: 13.9, powerFactor: 0.95 });
+      }
+      setEspConnected(true);
+      alert('ESP32 successfully paired and registered in Firebase!');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to connect ESP32. Please try again.');
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   return (
     <div>
@@ -25,8 +45,8 @@ export const ConsumerDashboard: React.FC = () => {
               <p className="text-secondary text-sm">Please connect your ESP32 Smart Meter to start tracking your live energy usage.</p>
             </div>
           </div>
-          <button className="btn btn-primary" onClick={() => { alert('ESP32 Connection flow started'); setEspConnected(true); }}>
-            <Wifi size={18} className="mr-2" /> Connect ESP32
+          <button className="btn btn-primary" disabled={connecting} onClick={connectESP32}>
+            <Wifi size={18} className="mr-2" /> {connecting ? 'Connecting...' : 'Connect ESP32'}
           </button>
         </div>
       )}

@@ -1,23 +1,44 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, get } from 'firebase/database';
+import { auth, db } from '../../firebase/config';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login logic
-    if (email.includes('admin')) {
-      localStorage.setItem('role', 'admin');
-      localStorage.setItem('user', JSON.stringify({ email, role: 'admin' }));
-      navigate('/admin/dashboard');
-    } else {
-      localStorage.setItem('role', 'consumer');
-      localStorage.setItem('user', JSON.stringify({ email, role: 'consumer' }));
-      navigate('/consumer/dashboard');
+    setError('');
+    setLoading(true);
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const user = credential.user;
+      let role = 'consumer';
+      
+      try {
+        const profileSnap = await get(ref(db, `users/${user.uid}/profile`));
+        if (profileSnap.exists()) {
+          role = profileSnap.val().role || 'consumer';
+        }
+      } catch (err) {
+        console.error("Failed to fetch role", err);
+      }
+      
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/consumer/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,13 +114,15 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
+          {error && <div style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>{error}</div>}
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
             <input type="checkbox" id="remember" style={{ accentColor: 'var(--accent-primary)' }} />
             <label htmlFor="remember" className="text-sm text-secondary">Remember me for 30 days</label>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', justifyContent: 'center' }}>
-            Sign In <ArrowRight size={18} />
+          <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', justifyContent: 'center', opacity: loading ? 0.7 : 1 }}>
+            {loading ? 'Signing in...' : <>Sign In <ArrowRight size={18} /></>}
           </button>
         </form>
 

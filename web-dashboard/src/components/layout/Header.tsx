@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, Bell, Search, Menu } from 'lucide-react';
+import { Sun, Moon, Bell, Search } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 interface HeaderProps {

@@ -83,7 +83,7 @@ You are the "Electro Book AI Smart Metering Advisor". Analyze the current grid s
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction: "You are an expert electrical engineer and green energy home consultant. Provide rich, professional advice utilizing high quality Markdown formatting with bullet points and bold headers.",

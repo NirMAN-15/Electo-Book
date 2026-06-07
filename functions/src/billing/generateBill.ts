@@ -1,10 +1,15 @@
-import * as functions from "firebase-functions";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions/v2";
 import { generatePDF } from "./generatePDF";
 
-export const generateMonthlyBills = functions.pubsub.schedule("0 0 1 * *")
-  .timeZone("Asia/Colombo")
-  .onRun(async (context) => {
+export const generateMonthlyBills = onSchedule(
+  {
+    schedule: "0 0 1 * *",
+    timeZone: "Asia/Colombo",
+    region: "asia-south1",
+  },
+  async () => {
     const db = admin.database();
     
     try {
@@ -12,8 +17,8 @@ export const generateMonthlyBills = functions.pubsub.schedule("0 0 1 * *")
       const meters = metersSnapshot.val();
       
       if (!meters) {
-        functions.logger.info('No meters found to bill.');
-        return null;
+        logger.info('No meters found to bill.');
+        return;
       }
 
       const now = new Date();
@@ -80,15 +85,16 @@ export const generateMonthlyBills = functions.pubsub.schedule("0 0 1 * *")
         // Generate PDF async
         await generatePDF(meterId, billId, billRecord, meterInfo);
         
-        functions.logger.info(`Generated bill ${billId} for meter ${meterId}`);
+        logger.info(`Generated bill ${billId} for meter ${meterId}`);
       });
 
       await Promise.all(promises);
-      functions.logger.info('Monthly billing completed successfully.');
-      return null;
+      logger.info('Monthly billing completed successfully.');
+      return;
 
     } catch (error) {
-      functions.logger.error('Error generating monthly bills', error);
-      return null;
+      logger.error('Error generating monthly bills', error);
+      return;
     }
-  });
+  }
+);

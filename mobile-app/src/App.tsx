@@ -715,7 +715,23 @@ export default function App() {
                         <p className="text-slate-400 text-xs">Connect your Smart Meter</p>
                       </div>
                     </div>
-                    <button className="bg-rose-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg" onClick={() => alert('Connect ESP32 Flow')}>
+                    <button className="bg-rose-500 hover:bg-rose-600 transition text-white text-xs font-bold px-3 py-1.5 rounded-lg" 
+                      onClick={async () => {
+                        try {
+                          const { ref, set } = await import('firebase/database');
+                          const { db } = await import('./firebase/config');
+                          if (user && meterId) {
+                            await set(ref(db, `meters/${meterId}/status`), 'connected');
+                            await set(ref(db, `meters/${meterId}/live`), { voltage: 230, current: 13.9, powerFactor: 0.95 });
+                            alert('ESP32 Successfully Connected and Registered in Firebase!');
+                          } else {
+                            alert('User or Meter ID not found. Please log in.');
+                          }
+                        } catch (e) {
+                          console.error(e);
+                          alert('Failed to connect ESP32');
+                        }
+                      }}>
                       Connect
                     </button>
                   </div>

@@ -4,8 +4,8 @@ import * as admin from "firebase-admin";
 // Initialize Firebase Admin App
 admin.initializeApp();
 
-// Export Auth functions
-export { onUserCreate } from "./auth/onUserCreate";
+// Export Auth functions - Note: Auth triggers not yet supported in firebase-functions v2
+// export { onUserCreate } from "./auth/onUserCreate";
 
 // Export Billing functions
 export { generateMonthlyBills } from "./billing/generateBill";
@@ -15,7 +15,7 @@ export { sendBillEmail } from "./billing/sendBillEmail";
 export { processAlarmTrigger } from "./alerts/processAlarm";
 
 // Export Predictions functions
-export { getAIPrediction } from "./predictions/getAIAdvice";
+export { getAIAdvice } from "./predictions/getAIAdvice";
 
 // Export Meter functions
 export { aggregateHourlyReadings, aggregateDailyReadings } from "./meter/aggregateReadings";

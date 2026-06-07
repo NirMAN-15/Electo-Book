@@ -1,0 +1,1 @@
+{"version":3,"file":"getAIAdvice.d.ts","sourceRoot":"","sources":["../../src/predictions/getAIAdvice.ts"],"names":[],"mappings":"AAMA,UAAU,kBAAkB;IAC1B,OAAO,EAAE,MAAM,CAAC;IAChB,UAAU,EAAE,GAAG,CAAC;IAChB,QAAQ,CAAC,EAAE,GAAG,CAAC;IACf,MAAM,CAAC,EAAE,GAAG,EAAE,CAAC;CAChB;AAED,eAAO,MAAM,WAAW;;YAuEvB,CAAC"}

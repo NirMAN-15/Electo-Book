@@ -1,12 +1,13 @@
 // Mock hooks
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export const useAuth = () => {
   return { user: null, loading: false };
 };
 
 export const useRealtimeData = (path: string) => {
-  const [data, setData] = useState(null);
+  void path;
+  const [data] = useState(null);
   return data;
 };
 

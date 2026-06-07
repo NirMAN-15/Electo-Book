@@ -1,27 +1,41 @@
-import * as functions from "firebase-functions";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions/v2";
 import { GoogleGenAI } from "@google/genai";
+import type { CallableRequest } from "firebase-functions/v2/https";
 
-export const getAIPrediction = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError("unauthenticated", "User must be logged in.");
-  }
+interface GetAIAdviceRequest {
+  meterId: string;
+  meterState: any;
+  settings?: any;
+  alarms?: any[];
+}
 
-  const { meterId, meterState, settings, alarms } = data;
-  if (!meterId || !meterState) {
-    throw new functions.https.HttpsError("invalid-argument", "Missing required data");
-  }
+export const getAIAdvice = onCall(
+  { region: "asia-south1" },
+  async (request: CallableRequest<GetAIAdviceRequest>) => {
+    const context = request.auth;
+    const data = request.data;
 
-  const apiKey = functions.config().gemini?.key || process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    functions.logger.warn("Gemini API key not configured. Returning fallback advice.");
-    return { advice: "API key not configured. Please ensure your electrical loads are balanced." };
-  }
+    if (!context) {
+      throw new HttpsError("unauthenticated", "User must be authenticated");
+    }
 
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-    
-    const prompt = `
+    const { meterId, meterState, settings, alarms } = data;
+    if (!meterId || !meterState) {
+      throw new HttpsError("invalid-argument", "Missing required data");
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      logger.warn("Gemini API key not configured. Returning fallback advice.");
+      return { advice: "API key not configured. Please ensure your electrical loads are balanced." };
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      
+      const prompt = `
 You are an expert Electrical Engineering AI Assistant for 'Electro Book' (a Sri Lankan Smart Energy Monitor).
 Analyze the following live meter reading and system state.
 
@@ -47,24 +61,25 @@ INSTRUCTIONS:
 4. Format your response strictly in Markdown with headers, bullet points, and bold text. Keep it concise but highly valuable. Do NOT wrap the entire response in a markdown code block.
 `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
 
-    const advice = response.text || "No advice generated.";
+      const advice = response.text || "No advice generated.";
 
-    // Cache prediction
-    await admin.database().ref(`/predictions/${meterId}/lastPrediction`).set({
-      advice,
-      generatedAt: admin.database.ServerValue.TIMESTAMP,
-      model: 'gemini-2.5-flash'
-    });
+      // Cache prediction
+      await admin.database().ref(`/predictions/${meterId}/lastPrediction`).set({
+        advice,
+        generatedAt: admin.database.ServerValue.TIMESTAMP,
+        model: 'gemini-2.5-flash'
+      });
 
-    return { advice };
+      return { advice };
 
-  } catch (error: any) {
-    functions.logger.error("Error generating AI prediction", error);
-    throw new functions.https.HttpsError("internal", error.message || "Failed to generate prediction");
+    } catch (error: any) {
+      logger.error("Error generating AI prediction", error);
+      throw new HttpsError("internal", error.message || "Failed to generate prediction");
+    }
   }
-});
+);
