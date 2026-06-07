@@ -32,7 +32,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Electo-Book">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         

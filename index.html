@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electro-Book Setup Error</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background-color: #1e293b;
+            padding: 3rem;
+            border-radius: 1rem;
+            max-width: 600px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+        h1 { color: #f87171; }
+        p { line-height: 1.6; color: #cbd5e1; }
+        .highlight { color: #38bdf8; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Deployment Configuration Needed</h1>
+        <p>If you are seeing this page, it means GitHub Pages is currently serving the raw source code of your repository instead of the compiled React Application.</p>
+        <p>Because Electro-Book is built with <strong>React and Vite</strong>, web browsers cannot read the raw code directly. It must be compiled first!</p>
+        <p>To fix this and see the actual dashboard, go to your GitHub Repository Settings:</p>
+        <p><strong>Settings &gt; Pages &gt; Build and deployment &gt; Source</strong></p>
+        <p>Change the dropdown from "Deploy from a branch" to <span class="highlight">"GitHub Actions"</span>.</p>
+    </div>
+</body>
+</html>
